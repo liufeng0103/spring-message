@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/jms
+       http://www.springframework.org/schema/jms/spring-jms.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://activemq.apache.org/schema/core
+       http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <context:component-scan base-package="com.bnade.spring"/>
+    <!-- 配置ActiveMQ自带的连接工厂ActiveMQConnectionFactory, 2中方式配置
+    <bean id="connectionFactory" class="org.apache.activemq.spring.ActiveMQConnectionFactory" />
+    参考http://activemq.apache.org/objectmessage.html，安全问题，需要设置消息对象的包作为trust packages
+    -->
+    <amq:connectionFactory id="connectionFactory" brokerURL="tcp://localhost:61616" trustAllPackages="true"/>
+
+    <!-- 声明ActiveMQ消息目的地
+    <bean id="queue" class="org.apache.activemq.command.ActiveMQQueue" c:_="bnade.queue"/>
+    <bean id="topic" class="org.apache.activemq.command.ActiveMQTopic" c:_="bnade.topic"/>
+    -->
+    <amq:queue id="bnadeQueue" physicalName="bnade.queue"/>
+    <amq:queue id="bnadeTopic" physicalName="bnade.topic"/>
+
+    <!-- 配置JmsTemplate来简化JMS操作, c:_-ref是构造器注入的简化写法, 配置defaultDestinationName后在JmsTemplate中可以省略queue的设置 -->
+    <bean id="jmsTemplate"
+          class="org.springframework.jms.core.JmsTemplate"
+          c:_-ref="connectionFactory"
+          p:defaultDestinationName="bnade.queue"/>
+
+    <!-- 配置消息监听器, 当有消息发送到队列中，自动调用BnadeAlertHandler的handleBnadeAlert方法，实现异步调用 -->
+    <bean id="bnadeHandle" class="com.bnade.spring.BnadeAlertHandler"/>
+    <jms:listener-container connection-factory="connectionFactory">
+        <jms:listener destination="bnade.queue" ref="bnadeHandle" method="handleBnadeAlert"/>
+    </jms:listener-container>
+</beans>
