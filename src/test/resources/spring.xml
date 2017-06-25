@@ -40,4 +40,6 @@
     <jms:listener-container connection-factory="connectionFactory">
         <jms:listener destination="bnade.queue" ref="bnadeHandle" method="handleBnadeAlert"/>
     </jms:listener-container>
+
+    <import resource="spring-rabbit.xml"/>
 </beans>

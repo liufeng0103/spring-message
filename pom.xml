@@ -37,6 +37,12 @@
 			<artifactId>spring-test</artifactId>
 			<version>4.0.6.RELEASE</version>
 		</dependency>
+		<!-- RabbitTemplate包 -->
+		<dependency>
+			<groupId>org.springframework.amqp</groupId>
+			<artifactId>spring-rabbit</artifactId>
+			<version>1.7.3.RELEASE</version>
+		</dependency>
 		<!-- JUnit4 -->
 		<dependency>
 			<groupId>junit</groupId>
